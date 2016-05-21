@@ -1,0 +1,34 @@
+* cs237-backend
+
+** Directory Structure
+- =bin= :: includes some helper tools.
+- =common= :: a module containing common classes used both in producer and samza processor.
+- =producer= :: a module containing kafka producers that generating simulated driver event data.
+- =samza= :: a module containing =DriverMatchTask= that match driver against requests.
+
+** Build
+run ~mvn clean package~ in the base directory. You need to install [[https://maven.apache.org/][Maven]] first.
+
+** Usage
+*** bin/grid
+A shell script for setup/run zookeeper, kafka, YARN (credit: [[http://samza.apache.org/startup/hello-samza/0.9/][Hello Samza]] ). It supports commands:
+- ~grid install~ :: install zookeeper, kafka, YARN, etc.
+- ~grid start~ :: start zookeeper, kafka, YARN, etc.
+- ~grid stop~ :: stop zookeeper, kafka, YARN, etc.
+- ~grid bootstrap~ :: equivalent to ~grid install all~, ~grid start all~
+
+Before running any producer or samza job, make sure the grid has started. 
+You can look in this script to see which ports are used for zookeeper, kafka and YARN.
+
+*** producer
+Compile the package first.
+In the project base directory, run ~java -jar producer/target/producer-1.0-SNAPSHOT.jar~. 
+You can test if producer is working properly by running:
+#+BEGIN_SRC bash
+deploy/kafka/bin/kafka-console-consumer.sh  --zookeeper localhost:2181 --topic test --from-beginning
+#+END_SRC
+*** samza
+After compiling, you can find a tar file in =samza/target/samza-1.0-SNAPSHOT-dist.tar.gz=. Unzip the content to directory =deploy/samza= (you may need to create the directory by your self). Then you can run command 
+#+BEGIN_SRC bash
+deploy/samza/bin/run-job.sh --config-factory=org.apache.samza.config.factories.PropertiesConfigFactory --config-path=file://$PWD/deploy/samza/config/driverMatchTask.properties
+#+END_SRC
